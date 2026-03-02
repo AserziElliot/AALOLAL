@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Device Tycoon Minimalist</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        #game-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 400px; }
+        .stats { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .section { margin-bottom: 20px; }
+        button { width: 100%; padding: 10px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; font-weight: bold; }
+        button:disabled { background: #ccc; }
+        .log { height: 100px; overflow-y: auto; background: #1e1e1e; color: #4af626; padding: 10px; font-size: 12px; border-radius: 5px; }
+        input[type="range"] { width: 100%; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <h2>📱 Device Tycoon</h2>
+    
+    <div class="stats">
+        <span>Dinero: $<span id="money">1000</span></span>
+        <span>Fans: <span id="fans">0</span></span>
+    </div>
+
+    <div class="section">
+        <label>Calidad del Componente (Costo mayor)</label>
+        <input type="range" id="quality" min="1" max="10" value="1">
+        <p>Costo de producción: $<span id="prod-cost">50</span></p>
+    </div>
+
+    <button id="btn-create">Diseñar y Lanzar Dispositivo</button>
+
+    <hr>
+    <h3>Historial de Ventas</h3>
+    <div id="log" class="log">Bienvenido al mercado. Diseña tu primer móvil...</div>
+</div>
+
+<script>
+    let money = 1000;
+    let fans = 50;
+    const logElement = document.getElementById('log');
+
+    // Actualizar costo en tiempo real
+    const qualitySlider = document.getElementById('quality');
+    const costDisplay = document.getElementById('prod-cost');
+
+    qualitySlider.addEventListener('input', () => {
+        costDisplay.innerText = qualitySlider.value * 50;
+    });
+
+    document.getElementById('btn-create').addEventListener('click', () => {
+        const quality = parseInt(qualitySlider.value);
+        const cost = quality * 50;
+
+        if (money >= cost) {
+            money -= cost;
+            
+            // Lógica de éxito: Calidad vs Suerte
+            const successBase = Math.random() * quality;
+            const unitsSold = Math.floor(successBase * (fans / 2) + Math.random() * 20);
+            const price = quality * 80;
+            const revenue = unitsSold * price;
+            
+            money += revenue;
+            fans += Math.floor(unitsSold / 5);
+
+            updateStats();
+            addLog(`Lanzado dispositivo Q${quality}. Vendidas ${unitsSold} unidades por $${revenue}!`);
+        } else {
+            addLog("¡No tienes suficiente dinero!");
+        }
+    });
+
+    function updateStats() {
+        document.getElementById('money').innerText = money;
+        document.getElementById('fans').innerText = fans;
+    }
+
+    function addLog(message) {
+        const entry = document.createElement('div');
+        entry.innerText = `> ${message}`;
+        logElement.prepend(entry);
+    }
+</script>
+
+</body>
+</html>
