@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tech Empire Tycoon | Architect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #05070a; --panel: #0f121a; --accent: #00d4ff; --border: #1e2633; --text: #e2e8f0; --inner: #161b26; }
+        * { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* Sidebar Navegación */
+        nav { width: 240px; background: var(--panel); border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .nav-btn { padding: 12px; border: 1px solid transparent; background: none; color: #64748b; text-align: left; cursor: pointer; border-radius: 8px; font-weight: 600; transition: 0.3s; }
+        .nav-btn.active { background: #1e293b; color: var(--accent); border-color: var(--accent); }
+        .nav-btn:hover:not(.active) { background: #161b26; color: white; }
+
+        /* Contenedor Principal */
+        main { flex: 1; display: flex; flex-direction: column; position: relative; }
+        header { height: 70px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 30px; gap: 40px; background: rgba(5,7,10,0.8); backdrop-filter: blur(10px); z-index: 10; }
+        .stat { display: flex; flex-direction: column; }
+        .stat label { font-size: 0.65rem; color: #64748b; text-transform: uppercase; font-weight: 800; }
+        .stat span { font-size: 1.1rem; font-weight: 800; color: #fff; }
+
+        .view { display: none; padding: 30px; overflow-y: auto; flex: 1; animation: fadeIn 0.3s ease; }
+        .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cartas y Formularios */
+        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        h2 { margin-top: 0; color: var(--accent); font-weight: 900; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        
+        select, input, button.main-btn { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--inner); color: white; margin: 8px 0; font-size: 0.9rem; }
+        button.main-btn { background: var(--accent); color: #000; font-weight: 800; border: none; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
+        button.main-btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
+
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; margin-right: 5px; }
+        .bg-gaming { background: #9333ea; } .bg-office { background: #2563eb; } .bg-server { background: #e11d48; }
+        
+        /* Inventario de componentes */
+        .comp-item { border-left: 3px solid var(--accent); background: var(--inner); padding: 10px; margin-bottom: 5px; font-size: 0.85rem; display: flex; justify-content: space-between; }
+        
+        #toast { position: fixed; bottom: 20px; right: 20px; background: #fff; color: #000; padding: 15px 25px; border-radius: 10px; font-weight: 700; display: none; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div style="font-size: 1.2rem; font-weight: 900; color: var(--accent); padding: 10px;">CORE_ARCHITECT</div>
+    <button class="nav-btn active" onclick="showTab('research')">🔬 Investigación</button>
+    <button class="nav-btn" onclick="showTab('components')">⚙️ Crear Componentes</button>
+    <button class="nav-btn" onclick="showTab('os')">💾 Crear OS</button>
+    <button class="nav-btn" onclick="showTab('assembly')">🏗️ Ensamblar Dispositivo</button>
+    <button class="nav-btn" onclick="showTab('market')">💹 Mercado</button>
+</nav>
+
+<main>
+    <header>
+        <div class="stat"><label>Capital</label><span id="m-money">$50,000</span></div>
+        <div class="stat"><label>Fans</label><span id="m-fans">1,200</span></div>
+        <div class="stat"><label>Ciencia</label><span id="m-rp">0 RP</span></div>
+        <button onclick="generateRP()" style="background:var(--accent); border:none; border-radius:50%; width:40px; height:40px; cursor:pointer; font-weight:bold;">+</button>
+    </header>
+
+    <section id="research" class="view active">
+        <h2>Árbol de Tecnologías</h2>
+        <div id="research-grid" class="grid"></div>
+    </section>
+
+    <section id="components" class="view">
+        <div class="grid">
+            <div class="card">
+                <h2>Diseñar Componente</h2>
+                <label>Tipo de pieza</label>
+                <select id="comp-type">
+                    <option value="CPU">Procesador (CPU)</option>
+                    <option value="GPU">Chip Gráfico (GPU)</option>
+                    <option value="RAM">Memoria RAM</option>
+                    <option value="Screen">Panel de Pantalla</option>
+                </select>
+                <label>Nombre del componente</label>
+                <input type="text" id="comp-name" placeholder="Ej: Bionic A1">
+                <label>Calidad (Afecta coste)</label>
+                <input type="range" id="comp-quality" min="1" max="100" value="50">
+                <button class="main-btn" onclick="createComponent()">Fabricar y Añadir al Inventario</button>
+            </div>
+            <div class="card">
+                <h3>Inventario de Piezas</h3>
+                <div id="comp-inventory"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="os" class="view">
+        <div class="card">
+            <h2>Desarrollar Sistema Operativo</h2>
+            <input type="text" id="os-name" placeholder="Nombre del OS (Ej: NebulaOS)">
+            <label>Enfoque del Kernel</label>
+            <select id="os-focus">
+                <option value="stability">Estabilidad (Oficina)</option>
+                <option value="performance">Rendimiento (Gaming)</option>
+                <option value="security">Seguridad (Server)</option>
+            </select>
+            <button class="main-btn" onclick="createOS()">Compilar Sistema</button>
+        </div>
+        <div id="os-inventory" class="grid"></div>
+    </section>
+
+    <section id="assembly" class="view">
+        <div class="card">
+            <h2>Ensamblar Dispositivo Final</h2>
+            <div class="grid">
+                <div>
+                    <label>Tipo de Dispositivo</label>
+                    <select id="dev-type">
+                        <option value="Smartphone">Smartphone</option>
+                        <option value="PC">PC de Sobremesa</option>
+                        <option value="Laptop">Portátil</option>
+                        <option value="TV">Smart TV</option>
+                    </select>
+                    <label>Nombre Comercial</label>
+                    <input type="text" id="dev-name" placeholder="Ej: Titan Phone">
+                    <label>Destino de uso</label>
+                    <select id="dev-use">
+                        <option value="office">Uso Oficina</option>
+                        <option value="gaming">Gaming Extremo</option>
+                        <option value="server">Servidor / Empresa</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Seleccionar CPU</label>
+                    <select id="select-cpu"></select>
+                    <label>Seleccionar Pantalla</label>
+                    <select id="select-screen"></select>
+                    <label>Seleccionar OS</label>
+                    <select id="select-os"></select>
+                    <button class="main-btn" style="margin-top:20px" onclick="launchDevice()">LANZAR AL MERCADO</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="market" class="view">
+        <h2>Ventas Globales en Tiempo Real</h2>
+        <div id="market-list" class="grid"></div>
+    </section>
+</main>
+
+<div id="toast"></div>
+
+<script>
+    // --- ESTADO DEL JUEGO ---
+    let game = {
+        money: 50000, fans: 1200, rp: 0,
+        techs: [
+            { id: 'multicore', name: 'Arquitectura Multinúcleo', rp: 50, cost: 5000, unlocked: false },
+            { id: '4k', name: 'Resolución 4K', rp: 120, cost: 12000, unlocked: false },
+            { id: 'cloud', name: 'Servicios en la Nube', rp: 300, cost: 40000, unlocked: false }
+        ],
+        inventory: { components: [], os: [], devices: [] }
+    };
+
+    // --- LÓGICA DE COMPONENTES ---
+    function createComponent() {
+        const type = document.getElementById('comp-type').value;
+        const name = document.getElementById('comp-name').value;
+        const quality = parseInt(document.getElementById('comp-quality').value);
+        const cost = quality * 150;
+
+        if (game.money >= cost && name) {
+            game.money -= cost;
+            game.inventory.components.push({ type, name, quality, id: Date.now() });
+            toast(`Fabricado: ${name} (Calidad: ${quality}%)`);
+            updateUI();
+            renderComponents();
+            populateSelects();
+        } else {
+            toast("Dinero insuficiente o falta nombre");
+        }
+    }
+
+    function createOS() {
+        const name = document.getElementById('os-name').value;
+        const focus = document.getElementById('os-focus').value;
+        const cost = 10000;
+
+        if (game.money >= cost && name) {
+            game.money -= cost;
+            game.inventory.os.push({ name, focus, id: Date.now() });
+            updateUI();
+            renderOS();
+            populateSelects();
+            toast(`Sistema ${name} desarrollado`);
+        }
+    }
+
+    // --- ENSAMBLAJE Y LANZAMIENTO ---
+    function launchDevice() {
+        const name = document.getElementById('dev-name').value;
+        const type = document.getElementById('dev-type').value;
+        const use = document.getElementById('dev-use').value;
+        
+        const cpuId = document.getElementById('select-cpu').value;
+        const osId = document.getElementById('select-os').value;
+
+        if (!name || !cpuId || !osId) return toast("Faltan componentes o nombre");
+
+        const cpu = game.inventory.components.find(c => c.id == cpuId);
+        const os = game.inventory.os.find(o => o.id == osId);
+
+        // El éxito depende de si el componente y el OS coinciden con el uso
+        let appeal = cpu.quality / 10;
+        if ((use === 'gaming' && os.focus === 'performance') || 
+            (use === 'office' && os.focus === 'stability')) appeal += 5;
+
+        const newDevice = {
+            name, type, use, appeal, 
+            sales: 0, profit: 0, 
+            price: cpu.quality * 20 + (use === 'server' ? 5000 : 500)
+        };
+
+        game.inventory.devices.push(newDevice);
+        toast(`¡Lanzamiento de ${name}!`);
+        showTab('market');
+        renderMarket();
+    }
+
+    // --- BUCLE DE VENTAS ---
+    setInterval(() => {
+        game.inventory.devices.forEach(d => {
+            let demand = (game.fans / 100) * d.appeal * (Math.random() + 0.5);
+            let units = Math.floor(demand);
+            let gain = units * d.price;
+            
+            d.sales += units;
+            d.profit += gain;
+            game.money += gain;
+            game.fans += Math.floor(units * 0.1);
+        });
+        updateUI();
+        if(document.getElementById('market').classList.contains('active')) renderMarket();
+    }, 4000);
+
+    // --- GESTIÓN DE UI ---
+    function showTab(tabId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+        
+        if (tabId === 'research') renderResearch();
+        if (tabId === 'components') renderComponents();
+        if (tabId === 'market') renderMarket();
+    }
+
+    function renderResearch() {
+        const grid = document.getElementById('research-grid');
+        grid.innerHTML = '';
+        game.techs.forEach((t, index) => {
+            grid.innerHTML += `
+                <div class="card" style="opacity: ${t.unlocked ? 0.5 : 1}">
+                    <h3>${t.name}</h3>
+                    <p>${t.rp} RP | $${t.cost.toLocaleString()}</p>
+                    <button class="main-btn" ${t.unlocked ? 'disabled' : ''} onclick="unlockTech(${index})">
+                        ${t.unlocked ? 'DESBLOQUEADO' : 'INVESTIGAR'}
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    function unlockTech(index) {
+        const t = game.techs[index];
+        if (game.rp >= t.rp && game.money >= t.cost) {
+            game.rp -= t.rp;
+            game.money -= t.cost;
+            t.unlocked = true;
+            updateUI();
+            renderResearch();
+            toast("Nueva tecnología disponible");
+        }
+    }
+
+    function renderComponents() {
+        const inv = document.getElementById('comp-inventory');
+        inv.innerHTML = game.inventory.components.map(c => `
+            <div class="comp-item">
+                <span><strong>${c.type}</strong>: ${c.name}</span>
+                <span style="color:var(--accent)">Q: ${c.quality}%</span>
+            </div>
+        `).join('');
+    }
+
+    function renderOS() {
+        const inv = document.getElementById('os-inventory');
+        inv.innerHTML = game.inventory.os.map(o => `
+            <div class="card">
+                <h3>${o.name}</h3>
+                <small>Kernel: ${o.focus}</small>
+            </div>
+        `).join('');
+    }
+
+    function renderMarket() {
+        const list = document.getElementById('market-list');
+        list.innerHTML = game.inventory.devices.map(d => `
+            <div class="card">
+                <span class="badge bg-${d.use}">${d.use.toUpperCase()}</span>
+                <h3>${d.name}</h3>
+                <p>Ventas: ${d.sales} uds.</p>
+                <p>Ganancia: <span style="color:var(--accent)">$${d.profit.toLocaleString()}</span></p>
+            </div>
+        `).join('');
+    }
+
+    function populateSelects() {
+        const cpuSel = document.getElementById('select-cpu');
+        const screenSel = document.getElementById('select-screen');
+        const osSel = document.getElementById('select-os');
+
+        cpuSel.innerHTML = game.inventory.components.filter(c => c.type === 'CPU').map(c => `<option value="${c.id}">${c.name} (${c.quality}%)</option>`).join('');
+        screenSel.innerHTML = game.inventory.components.filter(c => c.type === 'Screen').map(c => `<option value="${c.id}">${c.name} (${c.quality}%)</option>`).join('');
+        osSel.innerHTML = game.inventory.os.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+    }
+
+    function updateUI() {
+        document.getElementById('m-money').innerText = `$${Math.floor(game.money).toLocaleString()}`;
+        document.getElementById('m-fans').innerText = Math.floor(game.fans).toLocaleString();
+        document.getElementById('m-rp').innerText = game.rp;
+    }
+
+    function generateRP() {
+        game.rp += 5;
+        updateUI();
+    }
+
+    function toast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 3000);
+    }
+
+    updateUI();
+</script>
+</body>
+</html>
