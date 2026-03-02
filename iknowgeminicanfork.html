@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Global Tech Tycoon | Ecosystem</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #080a0f; --panel: #11141d; --accent: #4f46e5; --text: #f1f5f9; --border: #1e293b; --success: #10b981; }
+        * { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* Sidebar Navegación */
+        nav { width: 260px; background: var(--panel); border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
+        .nav-item { padding: 12px; margin: 4px 0; cursor: pointer; border-radius: 8px; transition: 0.2s; color: #94a3b8; font-weight: 600; }
+        .nav-item:hover, .nav-item.active { background: var(--accent); color: white; }
+        
+        /* Dashboard */
+        main { flex: 1; display: flex; flex-direction: column; }
+        header { padding: 20px 40px; background: #0c0f16; border-bottom: 1px solid var(--border); display: flex; gap: 40px; }
+        .stat-box { display: flex; flex-direction: column; }
+        .stat-box span:first-child { font-size: 0.7rem; color: #64748b; text-transform: uppercase; }
+        .stat-box span:last-child { font-size: 1.3rem; font-weight: 800; color: white; }
+
+        .view { display: none; padding: 30px; overflow-y: auto; flex: 1; }
+        .view.active { display: block; }
+
+        /* Factory / Design Studio */
+        .grid-layout { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
+        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        
+        select, input { width: 100%; background: #1e293b; border: 1px solid #334155; color: white; padding: 10px; border-radius: 6px; margin: 10px 0; }
+        
+        .type-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; background: #334155; }
+        .gaming { background: #9333ea; } .office { background: #2563eb; } .server { background: #db2777; }
+
+        button.btn-main { background: var(--accent); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 800; cursor: pointer; width: 100%; }
+        
+        #inventory-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 30px; color: var(--accent);">TECH_CORP_OS</div>
+    <div class="nav-item active" onclick="switchView('factory')">🏭 Fábrica de Diseño</div>
+    <div class="nav-item" onclick="switchView('lab')">🔬 Laboratorio I+D</div>
+    <div class="nav-item" onclick="switchView('portfolio')">💼 Catálogo Global</div>
+    <div class="nav-item" onclick="switchView('market')">📊 Mercado Vivo</div>
+</nav>
+
+<main>
+    <header>
+        <div class="stat-box"><span>Capital</span><span id="m-money">$10,000</span></div>
+        <div class="stat-box"><span>Fans</span><span id="m-fans">5,000</span></div>
+        <div class="stat-box"><span>Ciencia</span><span id="m-rp">0 RP</span></div>
+    </header>
+
+    <section id="factory" class="view active">
+        <div class="grid-layout">
+            <div class="card">
+                <h2>Nuevo Proyecto de Ingeniería</h2>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <label>Tipo de Producto</label>
+                        <select id="p-type" onchange="updateDesignForm()">
+                            <option value="Mobile">Smartphone</option>
+                            <option value="PC">Ordenador de Sobremesa</option>
+                            <option value="Laptop">Portátil</option>
+                            <option value="TV">Televisión Smart</option>
+                            <option value="OS">Sistema Operativo</option>
+                            <option value="Component">Componente (Chip/Pantalla)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Uso Destinado</label>
+                        <select id="p-use">
+                            <option value="office">Oficina / Estándar</option>
+                            <option value="gaming">Gaming / Alto Rendimiento</option>
+                            <option value="server">Servidor / Enterprise</option>
+                        </select>
+                    </div>
+                </div>
+                <label>Nombre del Modelo</label>
+                <input type="text" id="p-name" placeholder="Ej: Quantum G9">
+                
+                <div id="tech-selection" style="margin-top: 20px;">
+                    </div>
+            </div>
+
+            <div class="card">
+                <h3>Costes y Estimación</h3>
+                <div id="preview-data">
+                    <p>Coste de R&D: <span id="view-cost">$0</span></p>
+                    <p>Potencial de Mercado: <span id="view-market">Medio</span></p>
+                </div>
+                <button class="btn-main" onclick="createProduct()">INICIAR PRODUCCIÓN</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="portfolio" class="view">
+        <h2>Productos en el Mercado</h2>
+        <div id="inventory-list"></div>
+    </section>
+
+    <section id="lab" class="view">
+        <h2>Investigación y Desarrollo</h2>
+        <div id="research-list" class="grid-layout"></div>
+    </section>
+</main>
+
+<script>
+    let state = {
+        money: 10000, fans: 5000, rp: 100,
+        portfolio: [],
+        unlocked: ['base_tech'],
+        marketShare: { office: 0, gaming: 0, server: 0 }
+    };
+
+    const categories = {
+        'Mobile': { baseCost: 500, rpMult: 1.2 },
+        'PC': { baseCost: 800, rpMult: 1.5 },
+        'Laptop': { baseCost: 700, rpMult: 1.3 },
+        'TV': { baseCost: 400, rpMult: 1.0 },
+        'OS': { baseCost: 2000, rpMult: 3.0 },
+        'Component': { baseCost: 300, rpMult: 2.0 }
+    };
+
+    // --- MOTOR DE CREACIÓN ---
+    function createProduct() {
+        const name = document.getElementById('p-name').value;
+        const type = document.getElementById('p-type').value;
+        const use = document.getElementById('p-use').value;
+
+        if(!name) return alert("Ponle nombre al producto");
+
+        const cost = categories[type].baseCost * (use === 'server' ? 5 : use === 'gaming' ? 2 : 1);
+        
+        if(state.money >= cost) {
+            state.money -= cost;
+            const newProd = {
+                id: Date.now(),
+                name: name,
+                type: type,
+                use: use,
+                quality: Math.floor(Math.random() * 50) + 50,
+                sales: 0,
+                profit: 0,
+                status: 'active'
+            };
+            state.portfolio.push(newProd);
+            updateUI();
+            switchView('portfolio');
+            renderPortfolio();
+        } else {
+            alert("Fondos insuficientes para este proyecto.");
+        }
+    }
+
+    // --- SISTEMA DE VENTAS ---
+    setInterval(() => {
+        state.portfolio.forEach(p => {
+            if(p.status === 'active') {
+                // Lógica de ventas por segmento
+                let baseDemand = state.fans * 0.02;
+                if(p.use === 'gaming') baseDemand *= 1.5;
+                if(p.use === 'server') baseDemand *= 0.1; // Menos unidades, más precio
+
+                let units = Math.floor(baseDemand * (Math.random() + 0.5));
+                let price = categories[p.type].baseCost * (p.use === 'server' ? 20 : p.use === 'gaming' ? 4 : 2);
+                
+                let gain = units * price;
+                state.money += gain;
+                p.sales += units;
+                p.profit += gain;
+            }
+        });
+        updateUI();
+    }, 3000);
+
+    // --- UI ---
+    function switchView(id) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        event.target.classList.add('active');
+        if(id === 'portfolio') renderPortfolio();
+    }
+
+    function renderPortfolio() {
+        const list = document.getElementById('inventory-list');
+        list.innerHTML = '';
+        state.portfolio.forEach(p => {
+            list.innerHTML += `
+                <div class="card">
+                    <span class="type-badge ${p.use}">${p.use.toUpperCase()}</span>
+                    <h3>${p.name}</h3>
+                    <p><small>${p.type}</small></p>
+                    <hr style="border:0; border-top:1px solid var(--border)">
+                    <p>Ventas: <strong>${p.sales}</strong></p>
+                    <p>Ingresos: <strong style="color:var(--success)">$${p.profit.toLocaleString()}</strong></p>
+                </div>
+            `;
+        });
+    }
+
+    function updateUI() {
+        document.getElementById('m-money').innerText = `$${Math.floor(state.money).toLocaleString()}`;
+        document.getElementById('m-fans').innerText = Math.floor(state.fans).toLocaleString();
+        document.getElementById('m-rp').innerText = state.rp;
+    }
+
+    updateUI();
+</script>
+</body>
+</html>
