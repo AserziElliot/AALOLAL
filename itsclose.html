@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tech Empire | Architect Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;600;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #0d1117; --panel: #161b22; --accent: #58a6ff; --text: #c9d1d9; --border: #30363d; --gold: #f1e05a; }
+        * { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* Sidebar */
+        nav { width: 280px; background: #010409; border-right: 1px solid var(--border); padding: 25px; display: flex; flex-direction: column; gap: 10px; }
+        .logo { font-weight: 900; font-size: 1.5rem; color: var(--accent); margin-bottom: 30px; }
+        .nav-btn { padding: 12px; border: 1px solid transparent; background: none; color: #8b949e; text-align: left; cursor: pointer; border-radius: 8px; font-weight: 600; transition: 0.2s; }
+        .nav-btn.active { background: #161b22; color: white; border-color: var(--accent); }
+
+        /* Header Stats */
+        main { flex: 1; display: flex; flex-direction: column; background: radial-gradient(circle at top right, #1a202c, #0d1117); }
+        header { height: 70px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 40px; gap: 40px; background: rgba(1,4,9,0.8); backdrop-filter: blur(10px); }
+        .stat { display: flex; flex-direction: column; }
+        .stat label { font-size: 0.65rem; color: #8b949e; text-transform: uppercase; font-weight: 800; }
+        .stat span { font-size: 1.1rem; font-weight: 800; color: #fff; }
+
+        .view { display: none; padding: 40px; overflow-y: auto; flex: 1; }
+        .view.active { display: block; }
+
+        /* Forms & Cards */
+        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        input, select, button.btn { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #0d1117; color: white; margin: 8px 0; }
+        button.btn { background: var(--accent); color: #000; font-weight: 800; cursor: pointer; border: none; transition: 0.2s; }
+        button.btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.2); }
+        button.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* Review System */
+        .review { background: #fff; color: #000; padding: 15px; border-radius: 8px; border-left: 8px solid var(--accent); margin-top: 10px; }
+        .rating { font-size: 1.5rem; font-weight: 900; color: #238636; }
+
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; background: #30363d; margin-top: 5px; display: inline-block; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">TECH_EMPIRE v4</div>
+    <button class="nav-btn active" onclick="setTab('staff')">👥 Recursos Humanos</button>
+    <button class="nav-btn" onclick="setTab('tech')">🔬 Árbol de Tecnologías</button>
+    <button class="nav-btn" onclick="setTab('lab')">⚙️ Lab de Componentes</button>
+    <button class="nav-btn" onclick="setTab('factory')">🏗️ Fábrica de Ensamblaje</button>
+    <button class="nav-btn" onclick="setTab('market')">💹 Mercado y Crítica</button>
+</nav>
+
+<main>
+    <header>
+        <div class="stat"><label>Capital</label><span id="m-money">$100,000</span></div>
+        <div class="stat"><label>Personal</label><span id="m-staff">0 Eng / 0 Des</span></div>
+        <div class="stat"><label>Ciencia</label><span id="m-rp">0 RP</span></div>
+        <div class="stat"><label>Fans</label><span id="m-fans">500</span></div>
+        <button onclick="generateRP()" style="background:var(--gold); border:none; border-radius:50%; width:35px; height:35px; cursor:pointer; font-weight:900;">+</button>
+    </header>
+
+    <section id="staff" class="view active">
+        <h2>Contratación de Especialistas</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Ingeniero de Sistemas</h3>
+                <p>Genera RP y permite crear componentes complejos.</p>
+                <button class="btn" onclick="hire('eng')">Contratar ($5,000)</button>
+            </div>
+            <div class="card">
+                <h3>Diseñador de Producto</h3>
+                <p>Aumenta el atractivo visual y el Hype de tus dispositivos.</p>
+                <button class="btn" onclick="hire('des')">Contratar ($4,000)</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="tech" class="view">
+        <h2>Investigación Arquitectónica</h2>
+        <div id="tech-tree" class="grid"></div>
+    </section>
+
+    <section id="lab" class="view">
+        <div class="grid">
+            <div class="card">
+                <h2>Diseñar Arquitectura (CPU)</h2>
+                <label>Marca (Empresa)</label>
+                <input type="text" id="c-brand" value="Intel">
+                <label>Familia</label>
+                <input type="text" id="c-family" value="Core">
+                <label>Modelo / Nombre</label>
+                <input type="text" id="c-model" value="i9">
+                
+                <label>Arquitectura de Núcleos</label>
+                <select id="c-cores">
+                    <option value="2">2 Núcleos (Dual-Core)</option>
+                    <option value="4" id="t-4" disabled>4 Núcleos (Quad-Core)</option>
+                    <option value="8" id="t-8" disabled>8 Núcleos (Octa-Core)</option>
+                    <option value="16" id="t-16" disabled>16 Núcleos (High-End)</option>
+                    <option value="32" id="t-32" disabled>32 Núcleos (Ultra-Thread)</option>
+                    <option value="64" id="t-server" disabled>Server Cluster (Requiere 10 CPUs Max)</option>
+                </select>
+
+                <label>Litografía (Nanómetros)</label>
+                <select id="c-nm">
+                    <option value="14">14nm</option>
+                    <option value="7" id="t-7nm" disabled>7nm</option>
+                    <option value="3" id="t-3nm" disabled>3nm</option>
+                </select>
+
+                <button class="btn" onclick="createComponent()">Fabricar Lote de Componentes</button>
+            </div>
+            <div class="card">
+                <h3>Inventario de Componentes</h3>
+                <div id="comp-inv" style="font-family:'JetBrains Mono'; font-size:0.8rem;"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="factory" class="view">
+        <div class="card">
+            <h2>Configuración de Dispositivo Final</h2>
+            <div class="grid">
+                <div>
+                    <label>Nombre del Producto</label>
+                    <input type="text" id="p-name" placeholder="Ej: Galaxy Ultra">
+                    <label>Elegir CPU de la Familia</label>
+                    <select id="p-cpu-select"></select>
+                    <label>Uso del Dispositivo</label>
+                    <select id="p-use">
+                        <option value="office">Oficina / General</option>
+                        <option value="gaming">Gaming / Alto Rendimiento</option>
+                        <option value="server">Server / Workstation</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Precio Final al Público ($)</label>
+                    <input type="number" id="p-price" value="999">
+                    <p>Hype Actual: <span id="m-hype">0</span>%</p>
+                    <button class="btn" style="height:80px; font-size:1.2rem;" onclick="launchDevice()">LANZAR AL MERCADO</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="market" class="view">
+        <h2>Historial de Lanzamientos y Reseñas</h2>
+        <div id="market-feed"></div>
+    </section>
+</main>
+
+<script>
+    let game = {
+        money: 100000, rp: 0, eng: 0, des: 0, hype: 0,
+        unlocked: [],
+        inventory: [],
+        history: [],
+        maxedCpusInStock: 0
+    };
+
+    const techs = [
+        { id: 'c4', name: 'Arquitectura 4-Cores', rp: 100, cost: 10000, type: 'core' },
+        { id: 'c8', name: 'Arquitectura 8-Cores', rp: 300, cost: 25000, type: 'core' },
+        { id: 'c16', name: 'Arquitectura 16-Cores', rp: 800, cost: 50000, type: 'core' },
+        { id: 'c32', name: 'Arquitectura 32-Cores', rp: 2000, cost: 100000, type: 'core' },
+        { id: 'csrv', name: 'Architecture Server Grade', rp: 5000, cost: 250000, type: 'core' },
+        { id: 'n7', name: 'Nanómetros 7nm', rp: 500, cost: 30000, type: 'nm' },
+        { id: 'n3', name: 'Nanómetros 3nm', rp: 1500, cost: 80000, type: 'nm' }
+    ];
+
+    // --- BUCLE PASIVO ---
+    setInterval(() => {
+        game.rp += game.eng * 2;
+        game.hype = Math.min(100, game.hype + (game.des * 0.5));
+        updateUI();
+    }, 2000);
+
+    function updateUI() {
+        document.getElementById('m-money').innerText = `$${game.money.toLocaleString()}`;
+        document.getElementById('m-staff').innerText = `${game.eng} Eng / ${game.des} Des`;
+        document.getElementById('m-rp').innerText = game.rp;
+        document.getElementById('m-fans').innerText = game.fans.toLocaleString();
+        document.getElementById('m-hype').innerText = Math.floor(game.hype);
+
+        // Desbloqueos Visuales
+        if(game.unlocked.includes('c4')) document.getElementById('t-4').disabled = false;
+        if(game.unlocked.includes('c8')) document.getElementById('t-8').disabled = false;
+        if(game.unlocked.includes('c16')) document.getElementById('t-16').disabled = false;
+        if(game.unlocked.includes('c32')) document.getElementById('t-32').disabled = false;
+        if(game.unlocked.includes('csrv') && game.maxedCpusInStock >= 10) document.getElementById('t-server').disabled = false;
+        if(game.unlocked.includes('n7')) document.getElementById('t-7nm').disabled = false;
+        if(game.unlocked.includes('n3')) document.getElementById('t-3nm').disabled = false;
+
+        const sel = document.getElementById('p-cpu-select');
+        sel.innerHTML = game.inventory.map((c, i) => `<option value="${i}">${c.brand} ${c.family} ${c.model} (${c.cores} núcleos)</option>`).join('');
+    }
+
+    function hire(type) {
+        let cost = type === 'eng' ? 5000 : 4000;
+        if(game.money >= cost) { game.money -= cost; game[type]++; updateUI(); }
+    }
+
+    function generateRP() { game.rp += 5; updateUI(); renderTech(); }
+
+    function renderTech() {
+        const grid = document.getElementById('tech-tree');
+        grid.innerHTML = techs.map(t => `
+            <div class="card" style="opacity: ${game.unlocked.includes(t.id) ? 0.5 : 1}">
+                <h4>${t.name}</h4>
+                <p>${t.rp} RP | $${t.cost.toLocaleString()}</p>
+                <button class="btn" onclick="unlockTech('${t.id}')" ${game.unlocked.includes(t.id) ? 'disabled' : ''}>Investigar</button>
+            </div>
+        `).join('');
+    }
+
+    function unlockTech(id) {
+        let t = techs.find(x => x.id === id);
+        if(game.money >= t.cost && game.rp >= t.rp) {
+            game.money -= t.cost; game.rp -= t.rp;
+            game.unlocked.push(id); renderTech(); updateUI();
+        }
+    }
+
+    function createComponent() {
+        if(game.eng < 2) return alert("Necesitas al menos 2 Ingenieros para manejar esta maquinaria.");
+        const cores = parseInt(document.getElementById('c-cores').value);
+        const nm = parseInt(document.getElementById('c-nm').value);
+        const brand = document.getElementById('c-brand').value;
+        const family = document.getElementById('c-family').value;
+        const model = document.getElementById('c-model').value;
+
+        const cost = (cores * 500) + (20000 / nm);
+        if(game.money >= cost) {
+            game.money -= cost;
+            const comp = { brand, family, model, cores, nm, cost };
+            game.inventory.push(comp);
+            if(cores === 32 && nm === 3) game.maxedCpusInStock++;
+            renderInventory(); updateUI();
+        }
+    }
+
+    function renderInventory() {
+        document.getElementById('comp-inv').innerHTML = game.inventory.map(c => 
+            `<div>[${c.brand}] ${c.family} ${c.model} - ${c.cores}C / ${c.nm}nm</div>`
+        ).join('');
+    }
+
+    function launchDevice() {
+        const cpuIdx = document.getElementById('p-cpu-select').value;
+        if(cpuIdx === "") return;
+        const cpu = game.inventory[cpuIdx];
+        const name = document.getElementById('p-name').value;
+        const price = parseInt(document.getElementById('p-price').value);
+        const use = document.getElementById('p-use').value;
+
+        // ALGORITMO DE RESEÑA
+        let score = 50;
+        let reviews = [];
+
+        // Potencia vs Uso
+        if(use === 'gaming' && cpu.cores < 8) { score -= 20; reviews.push("Pocos núcleos para jugar."); }
+        if(use === 'server' && cpu.cores < 32) { score -= 30; reviews.push("Esto no es un servidor, es un juguete."); }
+        if(cpu.nm <= 7) { score += 15; reviews.push("Eficiencia térmica de vanguardia."); }
+
+        // Valor
+        let marketValue = (cpu.cores * 150) + (game.hype * 5);
+        if(price > marketValue * 1.5) { score -= 25; reviews.push("Precio absurdamente alto."); }
+        else if(price < marketValue) { score += 20; reviews.push("Calidad-precio imbatible."); }
+
+        score = Math.max(0, Math.min(100, score + (game.hype / 4)));
+        const sales = Math.floor((score / 100) * game.fans * 2);
+        const profit = sales * (price - cpu.cost);
+
+        game.money += profit;
+        game.fans += Math.floor(sales * 0.1);
+        game.hype = 0; // Se gasta el hype
+
+        game.history.unshift({ name, score, sales, reviews, profit });
+        setTab('market');
+        renderMarket();
+        updateUI();
+    }
+
+    function renderMarket() {
+        document.getElementById('market-feed').innerHTML = game.history.map(h => `
+            <div class="card">
+                <div style="display:flex; justify-content:space-between">
+                    <h3>${h.name}</h3>
+                    <div class="rating">${h.score}/100</div>
+                </div>
+                <div class="review">
+                    <strong>Reseña de los medios:</strong><br>
+                    ${h.reviews.map(r => `• ${r}`).join('<br>')}
+                </div>
+                <p>Ventas: ${h.sales.toLocaleString()} | Beneficio: $${h.profit.toLocaleString()}</p>
+            </div>
+        `).join('');
+    }
+
+    function setTab(id) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        updateUI();
+    }
+
+    renderTech();
+    updateUI();
+</script>
+</body>
+</html>
