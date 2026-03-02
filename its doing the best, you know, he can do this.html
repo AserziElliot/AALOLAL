@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tech Giant Tycoon | Master Architect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #0a0c10; --card: #161b22; --accent: #58a6ff; --success: #238636; --error: #da3633; --text: #c9d1d9; --border: #30363d; }
+        * { box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
+        body { background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* Sidebar Navegación */
+        nav { width: 260px; background: #010409; border-right: 1px solid var(--border); padding: 25px; display: flex; flex-direction: column; gap: 8px; }
+        .logo { font-weight: 700; font-size: 1.4rem; color: var(--accent); margin-bottom: 30px; letter-spacing: -1px; }
+        .nav-btn { padding: 12px; border: 1px solid transparent; background: none; color: #8b949e; text-align: left; cursor: pointer; border-radius: 8px; font-weight: 500; transition: 0.2s; }
+        .nav-btn.active { background: #161b22; color: white; border-color: var(--border); }
+        .nav-btn:hover:not(.active) { background: #0d1117; color: white; }
+
+        /* Contenedor Principal */
+        main { flex: 1; display: flex; flex-direction: column; }
+        header { height: 80px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 40px; gap: 50px; background: #0d1117; }
+        .stat-group { display: flex; flex-direction: column; }
+        .stat-label { font-size: 0.7rem; color: #8b949e; text-transform: uppercase; font-weight: 700; }
+        .stat-value { font-size: 1.2rem; font-weight: 700; color: #fff; }
+
+        .content { display: none; padding: 40px; overflow-y: auto; flex: 1; }
+        .content.active { display: block; }
+
+        /* Paneles y Grids */
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-bottom: 25px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        h2 { margin-top: 0; font-weight: 700; font-size: 1.8rem; }
+
+        /* Controles */
+        label { display: block; margin-bottom: 8px; font-size: 0.9rem; font-weight: 500; color: #8b949e; }
+        input, select, button.action-btn { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #0d1117; color: white; margin-bottom: 15px; }
+        button.action-btn { background: var(--accent); color: #000; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; }
+        button.action-btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
+        button.action-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* Reseñas */
+        .review-card { background: #f0f6fc; color: #010409; padding: 15px; border-radius: 8px; margin-top: 10px; border-left: 5px solid var(--accent); }
+        .rating { font-size: 1.5rem; font-weight: 800; color: var(--success); }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">DEVICE_TYCOON PRO</div>
+    <button class="nav-btn active" onclick="showTab('staff')">👥 Personal</button>
+    <button class="nav-btn" onclick="showTab('tech')">🔬 Tecnologías</button>
+    <button class="nav-btn" onclick="showTab('design')">⚙️ Diseño Hardware</button>
+    <button class="nav-btn" onclick="showTab('assembly')">🏗️ Ensamblaje</button>
+    <button class="nav-btn" onclick="showTab('market')">📊 Mercado</button>
+</nav>
+
+<main>
+    <header>
+        <div class="stat-group"><span class="stat-label">Capital</span><span class="stat-value" id="m-money">$50,000</span></div>
+        <div class="stat-group"><span class="stat-label">Ingenieros</span><span class="stat-value" id="m-eng">0</span></div>
+        <div class="stat-group"><span class="stat-label">Diseñadores</span><span class="stat-value" id="m-des">0</span></div>
+        <div class="stat-group"><span class="stat-label">Ciencia</span><span class="stat-value" id="m-rp">0 RP</span></div>
+    </header>
+
+    <section id="staff" class="content active">
+        <h2>Gestión de Personal</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Contratar Ingeniero</h3>
+                <p>Necesarios para fabricar Chips y Hardware avanzado.</p>
+                <button class="action-btn" onclick="hire('eng')">Contratar ($2,000 + Salario)</button>
+            </div>
+            <div class="card">
+                <h3>Contratar Diseñador</h3>
+                <p>Necesarios para ensamblar dispositivos y mejorar el OS.</p>
+                <button class="action-btn" onclick="hire('des')">Contratar ($1,500 + Salario)</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="tech" class="content">
+        <h2>Árbol Tecnológico (R&D)</h2>
+        <div id="tech-list" class="grid-2"></div>
+        <button class="action-btn" style="margin-top:20px; background:#f1e05a; color:#000" onclick="generateRP()">Generar RP (Investigar manualmente)</button>
+    </section>
+
+    <section id="design" class="content">
+        <div class="grid-2">
+            <div class="card">
+                <h2>Diseñar Chip (CPU)</h2>
+                <label>Nombre del Chip</label>
+                <input type="text" id="cpu-name" placeholder="Ejem: Snapdragon Z1">
+                <label>Litografía (Nanómetros)</label>
+                <select id="cpu-nm">
+                    <option value="14">14nm (Básico)</option>
+                    <option value="7" disabled id="t-7nm">7nm (Requiere Investigación)</option>
+                    <option value="4" disabled id="t-4nm">4nm (Requiere Investigación)</option>
+                </select>
+                <label>Número de Núcleos</label>
+                <input type="number" id="cpu-cores" min="2" max="16" value="4">
+                <label>Velocidad (GHz)</label>
+                <input type="number" id="cpu-speed" min="1.0" max="5.0" step="0.1" value="2.4">
+                <button class="action-btn" id="btn-create-cpu" onclick="createCPU()">Fabricar Chip</button>
+            </div>
+            <div class="card">
+                <h3>Inventario de Componentes</h3>
+                <div id="comp-inv" style="font-family:'JetBrains Mono'; font-size:0.8rem;"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="assembly" class="content">
+        <div class="card">
+            <h2>Lanzamiento de Dispositivo</h2>
+            <div class="grid-2">
+                <div>
+                    <label>Nombre del Dispositivo</label>
+                    <input type="text" id="dev-name" placeholder="Ej: SuperPhone 10">
+                    <label>Elegir Chip (Hardware)</label>
+                    <select id="dev-cpu-select"></select>
+                    <label>Tipo de Dispositivo</label>
+                    <select id="dev-type">
+                        <option value="gaming">Gaming</option>
+                        <option value="office">Oficina</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Precio de Venta ($)</label>
+                    <input type="number" id="dev-price" value="800">
+                    <button class="action-btn" style="height:100px; font-size:1.5rem;" onclick="launchDevice()">ENSAMBLAR Y LANZAR</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="market" class="content">
+        <h2>Resultados de Mercado</h2>
+        <div id="market-results"></div>
+    </section>
+</main>
+
+<script>
+    let state = {
+        money: 50000, rp: 0, eng: 0, des: 0,
+        unlocked: [],
+        inventory: { cpus: [] },
+        history: []
+    };
+
+    const techTree = [
+        { id: 'nm7', name: 'Litografía 7nm', cost: 1000, rp: 100 },
+        { id: 'nm4', name: 'Litografía 4nm', cost: 5000, rp: 500 },
+        { id: 'cores16', name: 'Arquitectura 16-cores', cost: 3000, rp: 300 }
+    ];
+
+    function updateUI() {
+        document.getElementById('m-money').innerText = `$${state.money.toLocaleString()}`;
+        document.getElementById('m-rp').innerText = state.rp;
+        document.getElementById('m-eng').innerText = state.eng;
+        document.getElementById('m-des').innerText = state.des;
+
+        // Desbloquear opciones en el select de CPU
+        if(state.unlocked.includes('nm7')) document.getElementById('t-7nm').disabled = false;
+        if(state.unlocked.includes('nm4')) document.getElementById('t-4nm').disabled = false;
+        
+        const cpuSelect = document.getElementById('dev-cpu-select');
+        cpuSelect.innerHTML = state.inventory.cpus.map(c => `<option value="${c.id}">${c.name} (${c.nm}nm, ${c.cores} núcleos)</option>`).join('');
+    }
+
+    function hire(type) {
+        let cost = type === 'eng' ? 2000 : 1500;
+        if(state.money >= cost) {
+            state.money -= cost;
+            state[type]++;
+            updateUI();
+        }
+    }
+
+    function generateRP() {
+        state.rp += 10 + (state.eng * 5);
+        updateUI();
+        renderTech();
+    }
+
+    function renderTech() {
+        const div = document.getElementById('tech-list');
+        div.innerHTML = techTree.map(t => `
+            <div class="card" style="opacity: ${state.unlocked.includes(t.id) ? 0.5 : 1}">
+                <h4>${t.name}</h4>
+                <p>${t.rp} RP | $${t.cost}</p>
+                <button class="action-btn" onclick="unlockTech('${t.id}')" ${state.unlocked.includes(t.id) ? 'disabled' : ''}>
+                    ${state.unlocked.includes(t.id) ? 'Desbloqueado' : 'Investigar'}
+                </button>
+            </div>
+        `).join('');
+    }
+
+    function unlockTech(id) {
+        const t = techTree.find(x => x.id === id);
+        if(state.rp >= t.rp && state.money >= t.cost) {
+            state.rp -= t.rp;
+            state.money -= t.cost;
+            state.unlocked.push(id);
+            updateUI();
+            renderTech();
+        }
+    }
+
+    function createCPU() {
+        if(state.eng < 1) return alert("Necesitas al menos 1 Ingeniero para fabricar hardware.");
+        
+        const name = document.getElementById('cpu-name').value;
+        const nm = parseInt(document.getElementById('cpu-nm').value);
+        const cores = parseInt(document.getElementById('cpu-cores').value);
+        const speed = parseFloat(document.getElementById('cpu-speed').value);
+        
+        const cost = (2000 / nm) * cores * speed;
+
+        if(state.money >= cost && name) {
+            state.money -= cost;
+            state.inventory.cpus.push({ id: Date.now(), name, nm, cores, speed, cost });
+            updateUI();
+            renderInventory();
+        } else {
+            alert("Fondos insuficientes");
+        }
+    }
+
+    function renderInventory() {
+        const inv = document.getElementById('comp-inv');
+        inv.innerHTML = state.inventory.cpus.map(c => `<div>- ${c.name}: ${c.nm}nm | ${c.cores} Cores @ ${c.speed}GHz</div>`).join('');
+    }
+
+    function launchDevice() {
+        if(state.des < 1) return alert("Necesitas al menos 1 Diseñador para ensamblar el dispositivo.");
+        
+        const name = document.getElementById('dev-name').value;
+        const price = parseInt(document.getElementById('dev-price').value);
+        const cpuId = document.getElementById('dev-cpu-select').value;
+        const type = document.getElementById('dev-type').value;
+
+        if(!name || !cpuId) return;
+
+        const cpu = state.inventory.cpus.find(c => c.id == cpuId);
+        
+        // LÓGICA DE RESEÑA
+        let rating = 100;
+        let comments = [];
+
+        // Evaluar Nanómetros (nm)
+        if(cpu.nm > 10) { rating -= 20; comments.push("El chip es demasiado grande y se calienta."); }
+        else { rating += 10; comments.push("Eficiencia energética increíble."); }
+
+        // Evaluar Relación Calidad/Precio
+        let valValue = (cpu.cores * cpu.speed * 200) / cpu.nm;
+        if(price > valValue * 1.5) { rating -= 30; comments.push("Es un robo, demasiado caro para lo que ofrece."); }
+        else if(price < valValue * 0.8) { rating += 15; comments.push("¡Una ganga absoluta por esta potencia!"); }
+
+        // Evaluar Coherencia (Gaming necesita núcleos)
+        if(type === 'gaming' && cpu.cores < 8) { rating -= 20; comments.push("¿Gaming con 4 núcleos? Es una broma."); }
+
+        const score = Math.max(0, Math.min(100, rating));
+        const sales = Math.floor((score / 100) * 1000 * (price < 1000 ? 2 : 1));
+        const profit = sales * (price - cpu.cost);
+
+        state.money += profit;
+        
+        const result = {
+            name, score, comments, sales, profit
+        };
+        
+        state.history.unshift(result);
+        showTab('market');
+        renderMarket();
+        updateUI();
+    }
+
+    function renderMarket() {
+        const res = document.getElementById('market-results');
+        res.innerHTML = state.history.map(h => `
+            <div class="card">
+                <h3>${h.name}</h3>
+                <div class="rating">${h.score}/100</div>
+                <div class="review-card">
+                    <strong>Crítica:</strong><br>
+                    ${h.comments.map(c => `• ${c}<br>`).join('')}
+                </div>
+                <p>Unidades vendidas: ${h.sales} | Beneficio: $${h.profit.toLocaleString()}</p>
+            </div>
+        `).join('');
+    }
+
+    function showTab(id) {
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        event.target.classList.add('active');
+        if(id === 'tech') renderTech();
+        if(id === 'design') renderInventory();
+    }
+
+    updateUI();
+</script>
+</body>
+</html>
