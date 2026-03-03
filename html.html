@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de TDP Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-2xl w-full bg-slate-800 rounded-3xl shadow-2xl border border-slate-700 overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-center">
+            <h1 class="text-3xl font-bold mb-2 flex justify-center items-center gap-3">
+                <i data-lucide="thermometer-snowflake"></i> Calculadora de TDP
+            </h1>
+            <p class="text-blue-100 opacity-90">Estima el consumo térmico y eléctrico de tu PC</p>
+        </div>
+
+        <div class="p-8 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-400 flex items-center gap-2">
+                        <i data-lucide="cpu" class="w-4 h-4"></i> TDP Base CPU (W)
+                    </label>
+                    <input type="number" id="cpuBase" value="65" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-400 flex items-center gap-2">
+                        <i data-lucide="monitor" class="w-4 h-4"></i> TDP Base GPU (W)
+                    </label>
+                    <input type="number" id="gpuBase" value="200" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-400 flex items-center gap-2">
+                        <i data-lucide="zap" class="w-4 h-4"></i> Overclock (%)
+                    </label>
+                    <select id="ocFactor" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                        <option value="1">Stock (0%)</option>
+                        <option value="1.15">Ligero (15%)</option>
+                        <option value="1.30">Agresivo (30%)</option>
+                    </select>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-400 flex items-center gap-2">
+                        <i data-lucide="activity" class="w-4 h-4"></i> Carga de Trabajo
+                    </label>
+                    <select id="loadFactor" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                        <option value="0.5">Media (Gaming/Office)</option>
+                        <option value="0.9">Alta (Render/Stress)</option>
+                        <option value="1">Pico (Max Teórico)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-700">
+                <label class="flex items-center gap-2 text-sm font-medium text-slate-400 mb-4">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Periféricos y otros (Fans, SSD, RGB)
+                </label>
+                <input type="range" id="others" min="10" max="150" value="40" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                <div class="flex justify-between text-xs text-slate-500 mt-2">
+                    <span>Mín (10W)</span>
+                    <span id="othersValue">40W</span>
+                    <span>Máx (150W)</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/50 rounded-2xl p-6 border border-blue-500/30">
+                <div class="flex justify-between items-end">
+                    <div>
+                        <p class="text-slate-400 text-sm">Estimación Total Sugerida</p>
+                        <h2 id="totalWatts" class="text-5xl font-bold text-blue-400">---</h2>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-slate-400 text-sm">Fuente Recomendada (PSU)</p>
+                        <p id="psuRecommended" class="text-xl font-semibold text-emerald-400">---</p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="calculateTDP()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all transform active:scale-95 shadow-lg shadow-blue-900/20">
+                Calcular Requerimientos
+            </button>
+        </div>
+
+        <div class="bg-slate-700/30 p-4 text-center text-xs text-slate-500">
+            * Nota: Los valores son estimaciones. Siempre consulta el manual del fabricante.
+        </div>
+    </div>
+
+    <script>
+        // Inicializar iconos
+        lucide.createIcons();
+
+        // Actualizar label de "Otros"
+        document.getElementById('others').addEventListener('input', (e) => {
+            document.getElementById('othersValue').innerText = e.target.value + 'W';
+        });
+
+        function calculateTDP() {
+            const cpu = parseFloat(document.getElementById('cpuBase').value) || 0;
+            const gpu = parseFloat(document.getElementById('gpuBase').value) || 0;
+            const oc = parseFloat(document.getElementById('ocFactor').value);
+            const load = parseFloat(document.getElementById('loadFactor').value);
+            const others = parseFloat(document.getElementById('others').value);
+
+            // Fórmula: ((CPU + GPU) * OC * Carga) + Componentes extra
+            const total = Math.round(((cpu + gpu) * oc * load) + others);
+            
+            // PSU Recomendada: Total + 30% de margen de seguridad (Headroom)
+            const psu = Math.ceil((total * 1.30) / 50) * 50;
+
+            // Animación simple de números
+            animateValue("totalWatts", total, "W");
+            document.getElementById('psuRecommended').innerText = psu + "W (80+ Gold)";
+        }
+
+        function animateValue(id, value, unit) {
+            const obj = document.getElementById(id);
+            let start = 0;
+            const duration = 500;
+            const startTime = performance.now();
+
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const current = Math.floor(progress * value);
+                obj.innerText = current + unit;
+                if (progress < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
+
+        // Cálculo inicial
+        calculateTDP();
+    </script>
+</body>
+</html>
