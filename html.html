@@ -3,144 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de TDP Pro</title>
+    <title>TDP Master Calculator | 2000 - 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains+Mono', monospace; }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px; width: 18px;
+            background: #3b82f6; border-radius: 50%;
+            cursor: pointer; box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-[#0f172a] text-slate-200 min-h-screen p-4 md:p-10">
 
-    <div class="max-w-2xl w-full bg-slate-800 rounded-3xl shadow-2xl border border-slate-700 overflow-hidden">
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-center">
-            <h1 class="text-3xl font-bold mb-2 flex justify-center items-center gap-3">
-                <i data-lucide="thermometer-snowflake"></i> Calculadora de TDP
-            </h1>
-            <p class="text-blue-100 opacity-90">Estima el consumo térmico y eléctrico de tu PC</p>
-        </div>
+    <div class="max-w-4xl mx-auto">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-4xl font-extrabold tracking-tight text-white flex items-center gap-3">
+                    <i data-lucide="zap" class="text-yellow-400 fill-yellow-400"></i> TDP <span class="text-blue-500">Master</span>
+                </h1>
+                <p class="text-slate-400 mt-1">Simulación de consumo de hardware: <span class="text-blue-400 font-bold text-sm">AÑO 2000 - 2026</span></p>
+            </div>
+            <div class="flex gap-2 bg-slate-800 p-1 rounded-xl border border-slate-700">
+                <button onclick="setEra('retro')" class="px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-700 transition-all">Retro (2000s)</button>
+                <button onclick="setEra('modern')" class="px-4 py-2 rounded-lg text-sm font-bold bg-blue-600 text-white shadow-lg shadow-blue-900/40">Actual</button>
+                <button onclick="setEra('future')" class="px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-700 transition-all">Extreme/2026</button>
+            </div>
+        </header>
 
-        <div class="p-8 space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="lg:col-span-2 space-y-6">
                 
-                <div class="space-y-2">
-                    <label class="text-sm font-medium text-slate-400 flex items-center gap-2">
-                        <i data-lucide="cpu" class="w-4 h-4"></i> TDP Base CPU (W)
-                    </label>
-                    <input type="number" id="cpuBase" value="65" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                </div>
-
-                <div class="space-y-2">
-                    <label class="text-sm font-medium text-slate-400 flex items-center gap-2">
-                        <i data-lucide="monitor" class="w-4 h-4"></i> TDP Base GPU (W)
-                    </label>
-                    <input type="number" id="gpuBase" value="200" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                </div>
-
-                <div class="space-y-2">
-                    <label class="text-sm font-medium text-slate-400 flex items-center gap-2">
-                        <i data-lucide="zap" class="w-4 h-4"></i> Overclock (%)
-                    </label>
-                    <select id="ocFactor" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                        <option value="1">Stock (0%)</option>
-                        <option value="1.15">Ligero (15%)</option>
-                        <option value="1.30">Agresivo (30%)</option>
-                    </select>
-                </div>
-
-                <div class="space-y-2">
-                    <label class="text-sm font-medium text-slate-400 flex items-center gap-2">
-                        <i data-lucide="activity" class="w-4 h-4"></i> Carga de Trabajo
-                    </label>
-                    <select id="loadFactor" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                        <option value="0.5">Media (Gaming/Office)</option>
-                        <option value="0.9">Alta (Render/Stress)</option>
-                        <option value="1">Pico (Max Teórico)</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="pt-4 border-t border-slate-700">
-                <label class="flex items-center gap-2 text-sm font-medium text-slate-400 mb-4">
-                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Periféricos y otros (Fans, SSD, RGB)
-                </label>
-                <input type="range" id="others" min="10" max="150" value="40" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
-                <div class="flex justify-between text-xs text-slate-500 mt-2">
-                    <span>Mín (10W)</span>
-                    <span id="othersValue">40W</span>
-                    <span>Máx (150W)</span>
-                </div>
-            </div>
-
-            <div class="bg-slate-900/50 rounded-2xl p-6 border border-blue-500/30">
-                <div class="flex justify-between items-end">
-                    <div>
-                        <p class="text-slate-400 text-sm">Estimación Total Sugerida</p>
-                        <h2 id="totalWatts" class="text-5xl font-bold text-blue-400">---</h2>
+                <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-2xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <label class="flex items-center gap-2 font-bold text-lg"><i data-lucide="cpu" class="text-blue-400"></i> Procesador (CPU)</label>
+                        <span id="cpuVal" class="mono text-blue-400 font-bold text-xl">125W</span>
                     </div>
-                    <div class="text-right">
-                        <p class="text-slate-400 text-sm">Fuente Recomendada (PSU)</p>
-                        <p id="psuRecommended" class="text-xl font-semibold text-emerald-400">---</p>
+                    <input type="range" id="cpuRange" min="15" max="600" value="125" step="5" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer mb-2" oninput="update()">
+                    <div class="flex justify-between text-[10px] uppercase tracking-widest text-slate-500 font-bold">
+                        <span>Pentium III (15W)</span>
+                        <span>Intel i9 / Threadripper</span>
+                        <span>2026 Ultra-High (600W)</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-2xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <label class="flex items-center gap-2 font-bold text-lg"><i data-lucide="monitor" class="text-emerald-400"></i> Gráfica (GPU)</label>
+                        <span id="gpuVal" class="mono text-emerald-400 font-bold text-xl">250W</span>
+                    </div>
+                    <input type="range" id="gpuRange" min="5" max="900" value="250" step="10" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer mb-2" oninput="update()">
+                    <div class="flex justify-between text-[10px] uppercase tracking-widest text-slate-500 font-bold">
+                        <span>GeForce 2 (5W)</span>
+                        <span>RTX 4090 / 5090</span>
+                        <span>Multi-GPU / 2026 (900W)</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-slate-800/50 border border-slate-700 p-5 rounded-2xl">
+                        <label class="text-xs font-bold text-slate-400 uppercase mb-3 block">Eficiencia VRM / OC</label>
+                        <select id="efficiency" onchange="update()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm outline-none focus:border-blue-500">
+                            <option value="1.0">Stock (Eficiente)</option>
+                            <option value="1.2">Overclock Ligero (+20%)</option>
+                            <option value="1.5">Extreme OC / LN2 (+50%)</option>
+                        </select>
+                    </div>
+                    <div class="bg-slate-800/50 border border-slate-700 p-5 rounded-2xl">
+                        <label class="text-xs font-bold text-slate-400 uppercase mb-3 block">Margen de Seguridad</label>
+                        <select id="headroom" onchange="update()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm outline-none focus:border-emerald-500">
+                            <option value="1.2">Seguro (20% Extra)</option>
+                            <option value="1.4" selected>Recomendado (40% Extra)</option>
+                            <option value="1.6">Industrial (60% Extra)</option>
+                        </select>
                     </div>
                 </div>
             </div>
 
-            <button onclick="calculateTDP()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all transform active:scale-95 shadow-lg shadow-blue-900/20">
-                Calcular Requerimientos
-            </button>
+            <div class="lg:col-span-1">
+                <div class="bg-blue-600 rounded-3xl p-8 sticky top-10 shadow-2xl shadow-blue-500/20 text-white overflow-hidden relative">
+                    <div class="relative z-10">
+                        <h3 class="text-blue-100 font-bold uppercase text-xs tracking-widest mb-6">Consumo Estimado</h3>
+                        
+                        <div class="mb-8">
+                            <span class="text-6xl font-black mono" id="totalWatts">0</span>
+                            <span class="text-2xl font-bold opacity-70 ml-1">W</span>
+                        </div>
+
+                        <div class="space-y-4 pt-6 border-t border-blue-400/50 text-sm">
+                            <div class="flex justify-between">
+                                <span class="opacity-80">Fuente Mínima:</span>
+                                <span id="psuMin" class="font-bold underline decoration-2 underline-offset-4">---</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="opacity-80">Calor Disipado:</span>
+                                <span id="heat" class="font-bold">---</span>
+                            </div>
+                        </div>
+
+                        <button class="w-full bg-white text-blue-600 font-extrabold py-4 rounded-xl mt-8 hover:bg-blue-50 transition-transform active:scale-95 flex justify-center items-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4"></i> EXPORTAR REPORTE
+                        </button>
+                    </div>
+                    <div class="absolute -right-10 -bottom-10 opacity-10 rotate-12">
+                        <i data-lucide="zap" class="w-48 h-48"></i>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
-        <div class="bg-slate-700/30 p-4 text-center text-xs text-slate-500">
-            * Nota: Los valores son estimaciones. Siempre consulta el manual del fabricante.
-        </div>
+        <footer class="mt-12 text-center text-slate-500 text-xs">
+            Desarrollado para diagnóstico de hardware v4.0 | © 2026 Simulador de Energía
+        </footer>
     </div>
 
     <script>
-        // Inicializar iconos
         lucide.createIcons();
 
-        // Actualizar label de "Otros"
-        document.getElementById('others').addEventListener('input', (e) => {
-            document.getElementById('othersValue').innerText = e.target.value + 'W';
-        });
-
-        function calculateTDP() {
-            const cpu = parseFloat(document.getElementById('cpuBase').value) || 0;
-            const gpu = parseFloat(document.getElementById('gpuBase').value) || 0;
-            const oc = parseFloat(document.getElementById('ocFactor').value);
-            const load = parseFloat(document.getElementById('loadFactor').value);
-            const others = parseFloat(document.getElementById('others').value);
-
-            // Fórmula: ((CPU + GPU) * OC * Carga) + Componentes extra
-            const total = Math.round(((cpu + gpu) * oc * load) + others);
+        function setEra(era) {
+            const cpu = document.getElementById('cpuRange');
+            const gpu = document.getElementById('gpuRange');
             
-            // PSU Recomendada: Total + 30% de margen de seguridad (Headroom)
-            const psu = Math.ceil((total * 1.30) / 50) * 50;
-
-            // Animación simple de números
-            animateValue("totalWatts", total, "W");
-            document.getElementById('psuRecommended').innerText = psu + "W (80+ Gold)";
-        }
-
-        function animateValue(id, value, unit) {
-            const obj = document.getElementById(id);
-            let start = 0;
-            const duration = 500;
-            const startTime = performance.now();
-
-            function update(currentTime) {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const current = Math.floor(progress * value);
-                obj.innerText = current + unit;
-                if (progress < 1) requestAnimationFrame(update);
+            if(era === 'retro') {
+                cpu.value = 45; gpu.value = 30;
+            } else if (era === 'modern') {
+                cpu.value = 125; gpu.value = 320;
+            } else {
+                cpu.value = 350; gpu.value = 650;
             }
-            requestAnimationFrame(update);
+            update();
         }
 
-        // Cálculo inicial
-        calculateTDP();
+        function update() {
+            // Obtener valores
+            const cpu = parseInt(document.getElementById('cpuRange').value);
+            const gpu = parseInt(document.getElementById('gpuRange').value);
+            const eff = parseFloat(document.getElementById('efficiency').value);
+            const head = parseFloat(document.getElementById('headroom').value);
+
+            // Actualizar etiquetas
+            document.getElementById('cpuVal').innerText = cpu + 'W';
+            document.getElementById('gpuVal').innerText = gpu + 'W';
+
+            // Cálculos
+            const baseTotal = (cpu + gpu + 50) * eff; // 50W base para RAM/Placa/Discos
+            const finalTotal = Math.round(baseTotal);
+            const recommendedPSU = Math.ceil((finalTotal * head) / 50) * 50;
+
+            // Mostrar resultados
+            document.getElementById('totalWatts').innerText = finalTotal;
+            document.getElementById('psuMin').innerText = recommendedPSU + 'W';
+            document.getElementById('heat').innerText = Math.round(finalTotal * 3.41) + ' BTU/h';
+        }
+
+        // Ejecutar al inicio
+        update();
     </script>
 </body>
 </html>
