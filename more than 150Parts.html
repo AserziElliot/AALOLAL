@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TDP Master: Extreme OC Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f1f5f9; }
+        .glass { background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 1.25rem; }
+        .oc-active { border-color: #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); }
+        select { background: #0f172a; border: 1px solid #1e293b; color: #94a3b8; padding: 0.6rem; border-radius: 0.5rem; width: 100%; cursor: pointer; font-size: 0.85rem; }
+        optgroup { color: #3b82f6; background: #020617; font-weight: bold; }
+        .neon-red { text-shadow: 0 0 15px rgba(239, 68, 68, 0.6); }
+        .neon-blue { text-shadow: 0 0 15px rgba(59, 130, 246, 0.6); }
+    </style>
+</head>
+<body class="p-4 lg:p-10 min-h-screen">
+
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <div class="lg:col-span-8 space-y-6">
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                <div class="flex items-center gap-4">
+                    <div class="bg-red-600 p-4 rounded-3xl shadow-lg shadow-red-500/20"><i data-lucide="zap" class="text-white w-8 h-8"></i></div>
+                    <div>
+                        <h1 class="text-3xl font-black tracking-tighter uppercase italic">OC <span class="text-red-500">LAB</span> 2026</h1>
+                        <p class="text-slate-500 font-mono text-[10px]">DATABASE V6.0 | >200 COMBINATIONS</p>
+                    </div>
+                </div>
+
+                <div id="ocContainer" class="glass p-4 flex items-center gap-4 border-2 border-transparent transition-all cursor-pointer" onclick="toggleOC()">
+                    <div id="ocIndicator" class="w-4 h-4 rounded-full bg-slate-600 shadow-[0_0_10px_rgba(0,0,0,0.5)]"></div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Modo Overclock</p>
+                        <p id="ocStatusText" class="text-xs font-bold text-slate-500 italic">DESACTIVADO</p>
+                    </div>
+                    <i data-lucide="flame" class="text-slate-600 w-6 h-6" id="flameIcon"></i>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="glass p-5">
+                    <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-3 block">Procesador (CPU)</label>
+                    <select id="cpuSelect" onchange="calculate()"></select>
+                </div>
+                <div class="glass p-5">
+                    <label class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-3 block">Gráfica (GPU)</label>
+                    <select id="gpuSelect" onchange="calculate()"></select>
+                </div>
+                <div class="glass p-5">
+                    <label class="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-3 block">Memoria RAM</label>
+                    <div class="flex gap-2">
+                        <select id="ramType" onchange="calculate()">
+                            <option value="4">DDR3/DDR4 (4W)</option>
+                            <option value="8" selected>DDR5 (8W)</option>
+                            <option value="15">DDR6 / Extreme (15W)</option>
+                        </select>
+                        <select id="ramQty" onchange="calculate()" class="w-24 text-center font-bold">
+                            <option value="2" selected>x2</option><option value="4">x4</option><option value="8">x8</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="glass p-5">
+                    <label class="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-3 block">Enfriamiento</label>
+                    <select id="coolerSelect" onchange="calculate()">
+                        <option value="10">Aire (10W)</option>
+                        <option value="35">Líquida AIO (35W)</option>
+                        <option value="80">Custom Loop / LN2 Prep (80W)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-4">
+            <div id="resultPanel" class="bg-gradient-to-b from-slate-800 to-slate-950 rounded-[3rem] p-10 h-full flex flex-col justify-between shadow-2xl border border-white/5 transition-all duration-500">
+                <div>
+                    <h2 class="text-white/40 font-black text-[10px] uppercase tracking-widest mb-8">Consumo Máximo</h2>
+                    <div class="mb-4">
+                        <span id="totalWatts" class="text-9xl font-black mono text-white leading-none transition-all">0</span>
+                        <span class="text-3xl font-bold text-slate-500">W</span>
+                    </div>
+                    <div id="loadTag" class="px-3 py-1 bg-white/5 rounded-lg text-[10px] font-bold uppercase text-slate-400 inline-block">--</div>
+                </div>
+
+                <div class="space-y-4 mt-12">
+                    <div class="bg-black/40 rounded-3xl p-6 border border-white/5">
+                        <p class="text-[10px] text-white/30 font-bold uppercase mb-1">PSU Sugerida</p>
+                        <p id="psuRec" class="text-3xl font-black text-white italic">--</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-white/5 p-4 rounded-2xl text-center border border-white/5">
+                            <p class="text-[10px] opacity-30 uppercase mb-1">Rail 12V</p>
+                            <p id="amps" class="font-bold text-white mono">--</p>
+                        </div>
+                        <div class="bg-white/5 p-4 rounded-2xl text-center border border-white/5">
+                            <p class="text-[10px] opacity-30 uppercase mb-1">Heat (BTU)</p>
+                            <p id="btu" class="font-bold text-white mono">--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ocEnabled = false;
+
+        const db = {
+            cpus: {
+                "Retro / Legend": [
+                    {n:"Pentium 4 Extreme (2005)", w:115}, {n:"Core 2 Extreme QX9770", w:136}, {n:"Phenom II X6 1100T", w:125}
+                ],
+                "Intel High-End": [
+                    {n:"i7-5960X (HEDT)", w:140}, {n:"i9-7980XE (18 Cores)", w:165}, {n:"i9-11900K", w:125}, {n:"i9-14900KS", w:320}
+                ],
+                "AMD High-End": [
+                    {n:"FX-9590 (5GHz)", w:220}, {n:"Ryzen 9 5950X", w:105}, {n:"Threadripper 3990X", w:280}, {n:"Ryzen 9 9950X", w:170}
+                ],
+                "Proyecciones 2026": [
+                    {n:"Nova Lake i9 'Extreme'", w:350}, {n:"Zen 6 Threadripper", w:400}
+                ]
+            },
+            gpus: {
+                "Vintage Power": [
+                    {n:"GeForce GTX 295 (Dual)", w:289}, {n:"Radeon HD 7990", w:375}, {n:"GTX 480", w:250}
+                ],
+                "NVIDIA RTX": [
+                    {n:"RTX 3090 Ti", w:450}, {n:"RTX 4080 Super", w:320}, {n:"RTX 4090", w:450}, {n:"RTX 5090 Blackwell", w:600}
+                ],
+                "AMD RX": [
+                    {n:"RX 6950 XT", w:335}, {n:"RX 7900 XTX", w:355}, {n:"RX 8900 XTX (2025)", w:450}
+                ],
+                "Ultra / Titan": [
+                    {n:"Titan RTX", w:280}, {n:"Titan V", w:250}, {n:"Titan 'AI' (2026 Est.)", w:800}
+                ]
+            }
+        };
+
+        function toggleOC() {
+            ocEnabled = !ocEnabled;
+            const container = document.getElementById('ocContainer');
+            const indicator = document.getElementById('ocIndicator');
+            const status = document.getElementById('ocStatusText');
+            const panel = document.getElementById('resultPanel');
+            const watts = document.getElementById('totalWatts');
+            const icon = document.getElementById('flameIcon');
+
+            if(ocEnabled) {
+                container.classList.add('oc-active');
+                indicator.className = "w-4 h-4 rounded-full bg-red-500 shadow-[0_0_15px_#ef4444]";
+                status.innerText = "ACTIVADO (+25% STRESS)";
+                status.className = "text-xs font-bold text-red-500 italic";
+                panel.className = "bg-gradient-to-b from-red-900 to-black rounded-[3rem] p-10 h-full flex flex-col justify-between shadow-2xl border border-red-500/30 transition-all duration-500";
+                watts.classList.add('neon-red');
+                icon.className = "text-red-500 w-6 h-6 animate-pulse";
+            } else {
+                container.classList.remove('oc-active');
+                indicator.className = "w-4 h-4 rounded-full bg-slate-600";
+                status.innerText = "DESACTIVADO";
+                status.className = "text-xs font-bold text-slate-500 italic";
+                panel.className = "bg-gradient-to-b from-slate-800 to-slate-950 rounded-[3rem] p-10 h-full flex flex-col justify-between shadow-2xl border border-white/5 transition-all duration-500";
+                watts.classList.remove('neon-red');
+                icon.className = "text-slate-600 w-6 h-6";
+            }
+            calculate();
+        }
+
+        function init() {
+            const cs = document.getElementById('cpuSelect');
+            const gs = document.getElementById('gpuSelect');
+            for (let g in db.cpus) {
+                let grp = document.createElement('optgroup'); grp.label = g;
+                db.cpus[g].forEach(c => grp.add(new Option(c.n, c.w)));
+                cs.add(grp);
+            }
+            for (let g in db.gpus) {
+                let grp = document.createElement('optgroup'); grp.label = g;
+                db.gpus[g].forEach(g => grp.add(new Option(g.n, g.w)));
+                gs.add(grp);
+            }
+            lucide.createIcons();
+            calculate();
+        }
+
+        function calculate() {
+            let cpu = parseInt(document.getElementById('cpuSelect').value);
+            let gpu = parseInt(document.getElementById('gpuSelect').value);
+            const ram = parseInt(document.getElementById('ramType').value) * parseInt(document.getElementById('ramQty').value);
+            const cool = parseInt(document.getElementById('coolerSelect').value);
+
+            if(ocEnabled) {
+                cpu = Math.round(cpu * 1.25);
+                gpu = Math.round(gpu * 1.25);
+            }
+
+            const total = cpu + gpu + ram + cool + 60;
+            document.getElementById('totalWatts').innerText = total;
+
+            const finalPsu = Math.ceil((total * 1.4) / 50) * 50;
+            document.getElementById('psuRec').innerText = (finalPsu < 500 ? 500 : finalPsu) + "W Titanium";
+            document.getElementById('amps').innerText = (total / 12).toFixed(1) + "A";
+            document.getElementById('btu').innerText = Math.round(total * 3.41);
+            
+            let tag = total > 800 ? "WARNING: CRITICAL LOAD" : (total > 400 ? "HIGH PERFORMANCE" : "NORMAL LOAD");
+            document.getElementById('loadTag').innerText = tag;
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
