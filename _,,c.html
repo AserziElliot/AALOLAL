@@ -2,180 +2,162 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TDP Database 2000-2026</title>
+    <title>Calculadora TDP Histórica (2000-2026)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0b0f1a; }
-        .glass { background: rgba(23, 32, 53, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        body { background-color: #0f172a; font-family: sans-serif; color: #f8fafc; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 1.5rem; padding: 1.5rem; }
+        select { background: #0f172a; border: 1px solid #475569; color: white; padding: 0.75rem; border-radius: 0.75rem; width: 100%; cursor: pointer; }
     </style>
 </head>
-<body class="text-slate-200 min-h-screen p-4 md:p-8">
+<body class="p-4 md:p-10">
 
-    <div class="max-w-5xl mx-auto">
-        <header class="mb-10 text-center md:text-left flex flex-col md:flex-row justify-between items-end gap-4">
-            <div>
-                <h1 class="text-4xl font-extrabold text-white tracking-tight">Hardware <span class="text-indigo-500">Power</span> Analyzer</h1>
-                <p class="text-slate-400">Base de datos histórica y predictiva: 26 años de evolución térmica.</p>
-            </div>
-            <div class="bg-indigo-600/20 text-indigo-400 px-4 py-2 rounded-full border border-indigo-500/30 text-sm font-bold">
-                v2.0 Update 2026
-            </div>
-        </header>
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8 text-blue-400 italic">PC Power Database 2000-2026</h1>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            <div class="lg:col-span-7 space-y-4">
-                
-                <div class="glass p-6 rounded-3xl">
-                    <label class="flex items-center gap-2 text-indigo-400 font-bold mb-4 uppercase text-xs tracking-widest">
-                        <i data-lucide="cpu"></i> Unidad Central (CPU)
-                    </label>
-                    <select id="cpuSelect" onchange="calculate()" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-white focus:ring-2 focus:ring-indigo-500 outline-none appearance-none cursor-pointer">
-                        <optgroup label="Era Retro (2000-2010)">
-                            <option value="30">Intel Pentium III (2000) - 30W</option>
-                            <option value="115">Intel Pentium 4 Extreme - 115W</option>
-                            <option value="125">AMD Phenom II X6 1100T - 125W</option>
-                        </optgroup>
-                        <optgroup label="Era Moderna (2011-2023)">
-                            <option value="77">Intel Core i7-3770K - 77W</option>
-                            <option value="105">AMD Ryzen 9 5950X - 105W</option>
-                            <option value="253" selected>Intel Core i9-14900K - 253W</option>
-                        </optgroup>
-                        <optgroup label="Próxima Gen (2024-2026)">
-                            <option value="280">AMD Ryzen 9 "Zen 6" (Est.) - 280W</option>
-                            <option value="350">Intel Core Ultra 9 Gen 17 (Est.) - 350W</option>
-                        </optgroup>
-                    </select>
+            <div class="space-y-6">
+                <div class="card">
+                    <label class="block text-blue-400 text-sm font-bold mb-2 uppercase tracking-widest">Procesador (CPU)</label>
+                    <select id="cpuSelect" onchange="calculate()"></select>
                 </div>
 
-                <div class="glass p-6 rounded-3xl">
-                    <label class="flex items-center gap-2 text-emerald-400 font-bold mb-4 uppercase text-xs tracking-widest">
-                        <i data-lucide="monitor"></i> Tarjeta Gráfica (GPU)
-                    </label>
-                    <select id="gpuSelect" onchange="calculate()" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-white focus:ring-2 focus:ring-emerald-500 outline-none appearance-none cursor-pointer">
-                        <optgroup label="Clásicos">
-                            <option value="10">3dfx Voodoo 5 - 10W</option>
-                            <option value="75">NVIDIA GeForce 8800 GT - 75W</option>
-                            <option value="250">GTX 480 "Fermi" - 250W</option>
-                        </optgroup>
-                        <optgroup label="High-End">
-                            <option value="250">GTX 1080 Ti - 250W</option>
-                            <option value="350">RTX 3090 - 350W</option>
-                            <option value="450" selected>RTX 4090 - 450W</option>
-                        </optgroup>
-                        <optgroup label="Dominio 2025-2026">
-                            <option value="600">RTX 5090 Blackwell (Est.) - 600W</option>
-                            <option value="850">Titan AI / Ultra 2026 (Est.) - 850W</option>
-                        </optgroup>
-                    </select>
+                <div class="card">
+                    <label class="block text-emerald-400 text-sm font-bold mb-2 uppercase tracking-widest">Gráfica (GPU)</label>
+                    <select id="gpuSelect" onchange="calculate()"></select>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="glass p-4 rounded-2xl text-center">
-                        <i data-lucide="layers" class="mx-auto mb-2 text-slate-500"></i>
-                        <span class="block text-[10px] uppercase text-slate-400">RAM</span>
-                        <select id="ramSelect" onchange="calculate()" class="bg-transparent text-sm font-bold outline-none">
-                            <option value="10">2 Sticks - 10W</option>
-                            <option value="20">4 Sticks - 20W</option>
+                <div class="card">
+                    <label class="block text-purple-400 text-sm font-bold mb-2 uppercase tracking-widest">Memoria RAM</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <select id="ramType" onchange="calculate()">
+                            <option value="3">DDR2 / DDR3 (3W)</option>
+                            <option value="4">DDR4 (4W)</option>
+                            <option value="6" selected>DDR5 (6W)</option>
+                            <option value="12">DDR5 OC/RGB (12W)</option>
+                            <option value="15">DDR6 - 2026 (15W)</option>
+                        </select>
+                        <select id="ramQty" onchange="calculate()">
+                            <option value="1">1 Módulo</option>
+                            <option value="2" selected>2 Módulos</option>
+                            <option value="4">4 Módulos</option>
                         </select>
                     </div>
-                    <div class="glass p-4 rounded-2xl text-center">
-                        <i data-lucide="hard-drive" class="mx-auto mb-2 text-slate-500"></i>
-                        <span class="block text-[10px] uppercase text-slate-400">Storage</span>
-                        <select id="diskSelect" onchange="calculate()" class="bg-transparent text-sm font-bold outline-none">
-                            <option value="5">1x NVMe - 5W</option>
-                            <option value="20">Multi SSD/HDD - 20W</option>
-                        </select>
-                    </div>
-                    <div class="glass p-4 rounded-2xl text-center">
-                        <i data-lucide="fan" class="mx-auto mb-2 text-slate-500"></i>
-                        <span class="block text-[10px] uppercase text-slate-400">Cooling</span>
-                        <select id="fanSelect" onchange="calculate()" class="bg-transparent text-sm font-bold outline-none">
-                            <option value="15">Aire - 15W</option>
-                            <option value="40">AIO Líquida - 40W</option>
-                        </select>
-                    </div>
-                    <div class="glass p-4 rounded-2xl text-center">
-                        <i data-lucide="palette" class="mx-auto mb-2 text-slate-500"></i>
-                        <span class="block text-[10px] uppercase text-slate-400">RGB/Fans</span>
-                        <select id="rgbSelect" onchange="calculate()" class="bg-transparent text-sm font-bold outline-none">
-                            <option value="5">Bajo - 5W</option>
-                            <option value="30">Full RGB - 30W</option>
-                        </select>
+                </div>
+
+                <div class="card">
+                    <label class="block text-amber-400 text-sm font-bold mb-2 uppercase tracking-widest">Almacenamiento</label>
+                    <select id="driveSelect" onchange="calculate()">
+                        <option value="5">1x SSD SATA / NVMe (5W)</option>
+                        <option value="15">1x HDD Antiguo (15W)</option>
+                        <option value="20">Múltiples Discos (20W)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-col justify-center">
+                <div class="bg-blue-600 rounded-[2.5rem] p-10 shadow-2xl text-center">
+                    <p class="text-blue-100 uppercase text-xs font-bold tracking-widest mb-2">Consumo Total Estimado</p>
+                    <div class="text-7xl font-black mb-4"><span id="totalWatts">0</span><span class="text-2xl ml-2">W</span></div>
+                    
+                    <div class="bg-black/20 rounded-2xl p-4 mt-6 text-left space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span>Fuente Recomendada:</span>
+                            <span id="psuRec" class="font-bold text-yellow-300">--</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>Era detectada:</span>
+                            <span id="eraTag" class="font-bold text-blue-200">--</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="lg:col-span-5">
-                <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[2rem] p-8 text-white h-full shadow-2xl relative overflow-hidden">
-                    <div class="relative z-10">
-                        <h2 class="text-indigo-100 font-bold text-sm uppercase tracking-tighter mb-10">Consumo Total del Sistema</h2>
-                        
-                        <div class="flex items-baseline gap-2 mb-2">
-                            <span id="totalDisplay" class="text-8xl font-black tracking-tighter">0</span>
-                            <span class="text-3xl font-bold opacity-50">W</span>
-                        </div>
-                        
-                        <div class="space-y-6 mt-10">
-                            <div class="flex justify-between items-center border-b border-white/10 pb-4">
-                                <span class="text-indigo-100/70">Fuente Sugerida (PSU)</span>
-                                <span id="psuDisplay" class="text-2xl font-bold italic text-yellow-300">---</span>
-                            </div>
-                            <div class="flex justify-between items-center border-b border-white/10 pb-4">
-                                <span class="text-indigo-100/70">Amperaje (+12V Est.)</span>
-                                <span id="ampsDisplay" class="font-bold">---</span>
-                            </div>
-                            <div class="p-4 bg-black/20 rounded-2xl text-xs leading-relaxed text-indigo-100/80">
-                                <strong>Análisis 2026:</strong> Si el total supera los 800W, se recomienda un circuito eléctrico dedicado y fuentes con estándar <strong>ATX 3.1</strong> para evitar picos de transitorios.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="absolute top-0 right-0 p-8 opacity-20">
-                        <i data-lucide="zap" class="w-32 h-32"></i>
-                    </div>
-                </div>
-            </div>
         </div>
-
-        <footer class="mt-8 text-center text-slate-600 text-sm">
-            Nota: Los valores de componentes posteriores a 2024 son basados en filtraciones y hojas de ruta tecnológicas.
-        </footer>
     </div>
 
     <script>
-        lucide.createIcons();
+        // --- BASE DE DATOS DE COMPONENTES ---
+        // Aquí puedes añadir todos los que quieras fácilmente
+        const database = {
+            cpus: [
+                { name: "Pentium III", tdp: 30, era: "Retro" },
+                { name: "Pentium 4 Prescott", tdp: 115, era: "Retro" },
+                { name: "Core 2 Quad Q6600", tdp: 105, era: "Retro" },
+                { name: "Core i7-4770K", tdp: 84, era: "Moderna" },
+                { name: "Ryzen 9 5900X", tdp: 105, era: "Moderna" },
+                { name: "Core i9-14900K", tdp: 253, era: "Actual" },
+                { name: "Ryzen 9 9950X ", tdp: 170, era: "Actual" },
+                { name: "Intel 'Nova Lake'", tdp: 300, era: "Futura" }, 
+                { name: "Intel Core 2 Quad Q9650", tdp: 95, era: "Retro" }
+            ],
+            gpus: [
+                { name: "Voodoo 5 5500 (2000)", tdp: 30, era: "Retro" },
+                { name: "GeForce 8800 GTX (2006)", tdp: 145, era: "Retro" },
+                { name: "GTX 1080 Ti (2017)", tdp: 250, era: "Moderna" },
+                { name: "RTX 4090 (2023)", tdp: 450, era: "Actual" },
+                { name: "RTX 5090 (Est. 2025)", tdp: 600, era: "Futura" },
+                { name: "Titan 'AI Edition' (Est. 2026)", tdp: 800, era: "Futura" },
+                { name: "RX 550 QTHREE", tdp: 50, era: "Retro" }
+            ]
+        };
 
-        function calculate() {
-            // Valores de Selects
-            const cpu = parseInt(document.getElementById('cpuSelect').value);
-            const gpu = parseInt(document.getElementById('gpuSelect').value);
-            const ram = parseInt(document.getElementById('ramSelect').value);
-            const disk = parseInt(document.getElementById('diskSelect').value);
-            const fan = parseInt(document.getElementById('fanSelect').value);
-            const rgb = parseInt(document.getElementById('rgbSelect').value);
-            
-            // Placa Base (Consumo base estimado)
-            const mobo = 40;
+        // Función para llenar los selectores al abrir la página
+        function loadDatabase() {
+            const cpuDropdown = document.getElementById('cpuSelect');
+            const gpuDropdown = document.getElementById('gpuSelect');
 
-            const total = cpu + gpu + ram + disk + fan + rgb + mobo;
+            database.cpus.forEach(item => {
+                let opt = document.createElement('option');
+                opt.value = item.tdp;
+                opt.innerHTML = `${item.name} - ${item.tdp}W`;
+                opt.dataset.era = item.era;
+                cpuDropdown.appendChild(opt);
+            });
 
-            // Mostrar Total
-            document.getElementById('totalDisplay').innerText = total;
+            database.gpus.forEach(item => {
+                let opt = document.createElement('option');
+                opt.value = item.tdp;
+                opt.innerHTML = `${item.name} - ${item.tdp}W`;
+                gpuDropdown.appendChild(opt);
+            });
 
-            // Calcular Fuente Recomendada (Total + 30% Headroom para eficiencia)
-            const recommended = Math.ceil((total * 1.30) / 50) * 50;
-            document.getElementById('psuDisplay').innerText = (recommended < 450 ? 450 : recommended) + "W";
-
-            // Amperaje estimado en el rail de 12V
-            const amps = (total / 12).toFixed(1);
-            document.getElementById('ampsDisplay').innerText = amps + "A";
+            calculate();
         }
 
-        // Ejecución inicial
-        calculate();
+        // Función principal de cálculo
+        function calculate() {
+            const cpu = parseInt(document.getElementById('cpuSelect').value);
+            const gpu = parseInt(document.getElementById('gpuSelect').value);
+            
+            // Lógica de RAM (Vatios por módulo * cantidad)
+            const ramW = parseInt(document.getElementById('ramType').value);
+            const ramQ = parseInt(document.getElementById('ramQty').value);
+            const ramTotal = ramW * ramQ;
+
+            const drives = parseInt(document.getElementById('driveSelect').value);
+            const mobo = 40; // Consumo base placa base
+
+            const total = cpu + gpu + ramTotal + drives + mobo;
+
+            // Mostrar resultados
+            document.getElementById('totalWatts').innerText = total;
+
+            // Recomendación de fuente (Total + 30% margen de seguridad)
+            const psu = Math.ceil((total * 1.3) / 50) * 50;
+            document.getElementById('psuRec').innerText = (psu < 400 ? 400 : psu) + "W";
+
+            // Detectar era para el tag visual
+            const selectedCpu = document.getElementById('cpuSelect');
+            const era = selectedCpu.options[selectedCpu.selectedIndex].dataset.era;
+            document.getElementById('eraTag').innerText = era;
+        }
+
+        // Iniciar
+        loadDatabase();
+        lucide.createIcons();
     </script>
 </body>
 </html>
